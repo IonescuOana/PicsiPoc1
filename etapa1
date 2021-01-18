@@ -1,0 +1,761 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+using namespace std;
+class Film
+{
+private:
+    string nume_film;
+    char* gen;
+    static float rating;
+    int* ora[24];
+    int* minut[60];
+    string durata;
+    string data;
+    const char subtitrare = (char)* "Romana";
+    int age;
+    int nr_filme;
+public:
+    Film()
+    {
+        nume_film = "";
+        data = "";
+        age = 0;
+        gen = (char*)&"";
+        durata = "";
+        data = "";
+        nr_filme = 0;
+    }
+    Film(string nume_film, char* gen, string durata, int age, int* ora, int* minut, string data, int nr_filme) : subtitrare(subtitrare)
+    {
+        this->nume_film = nume_film;
+        this->data = data;
+        this->age = age;
+        this->gen = new char[strlen(gen) + 1];
+        for (int i = 0; i < strlen(gen) + 1; i++)
+                this->gen[i] = gen[i];
+        this->durata = durata;
+        for (int i = 0; i < 24 ;i++)
+            this->ora[i] = (int*)ora[i];
+        for (int i = 0; i < 60; i++)
+            this->minut[i] = (int*)minut[i];
+
+    }
+    ~Film() 
+    {
+        if (gen != nullptr && gen != " ")
+            delete[] gen;
+        if (ora != NULL)
+            delete[] ora;
+        if (minut != NULL)
+            delete[] minut;
+    }
+    Film(const Film& a) : subtitrare(a.subtitrare)
+    {
+        nume_film = a.nume_film;
+        data = a.data;
+        age = a.age;
+        gen = new char[strlen(a.gen) + 1];
+        for (int i = 0; i < strlen(a.gen) + 1; i++)
+            gen[i] = a.gen[i];
+        durata = a.durata;
+        for (int i = 0; i < 24;i++)
+            ora[i] = (int*)a.ora[i];
+        for (int i = 0; i < 60; i++)
+            minut[i] = (int*)a.minut[i];
+        nr_filme = a.nr_filme;
+    }
+    Film operator=(Film a)
+    {
+        if (gen != a.gen)
+        {
+            if (gen != " ")
+            {
+                delete[] gen;
+                gen = (char*)&"";
+            }
+            gen = new char[strlen(a.gen) + 1];
+            for (int i = 0; i < strlen(a.gen) + 1; i++)
+                gen[i] = a.gen[i];
+
+        }
+        else
+            gen = nullptr;
+        if (ora != a.ora)
+        {
+            if (ora != NULL)
+                delete[] ora;
+            for (int i = 0; i < 24;i++)
+                ora[i] = (int*)a.ora[i];
+        }
+        if (minut != a.minut)
+        {
+            if (minut != NULL)
+                delete[] minut;
+            for (int i = 0; i < 24;i++)
+                minut[i] = (int*)a.minut[i];
+        }
+        return *this;
+    
+    }
+    friend ostream& operator<<(ostream&, Film);
+    friend istream& operator>>(istream&, Film);
+    int* operator[](int index)
+    {
+        if (index >= 0)
+            return ora[index];
+    }
+    friend Film operator+(Film, Film);
+    Film operator++()
+    {
+        nr_filme++;
+        return *this;
+    }
+    friend Film operator++(Film,int);
+    operator int()
+    {
+        return nr_filme;
+    }
+    friend bool operator!(Film);
+    bool operator == (const Film& c)
+    {
+        Film copie = c;
+        if (c.nume_film == copie.nume_film)
+            return true;
+        else
+            return false;
+
+    }
+
+};
+float Film::rating;
+ostream& operator<<(ostream& out, Film a)
+{
+    out << a.age << endl;;
+    for (int i = 0; i < a.nume_film.length(); i++)
+        out << a.nume_film[i];
+    out << endl;
+    for (int i = 0; i < strlen(a.gen); i++)
+        out << a.gen[i];
+    out << endl;
+    out << a.rating << endl;
+    for (int i = 0; i < 24; i++)
+        out << a.ora[i];
+    out << endl;
+    for (int i = 0; i < 60; i++)
+        out << a.minut[i];
+    out << endl;
+    for (int i = 0; i < a.durata.length(); i++)
+        out << a.durata[i];
+    out << endl;
+    for (int i = 0; i < a.data.length(); i++)
+        out << a.data[i];
+    out << endl;
+    out << a.nr_filme << endl;
+    return out;
+}
+istream& operator>>(istream& in, Film a)
+{
+    in >> a.age;
+    for (int i = 0; i < a.nume_film.length(); i++)
+        in >> a.nume_film[i];
+    for (int i = 0; i < strlen(a.gen); i++)
+        in >> a.gen[i];
+    in >> a.rating;
+    for (int i = 0; i < a.durata.length(); i++)
+        in >> a.durata[i];
+    for (int i = 0; i < a.data.length(); i++)
+        in >> a.data[i];
+    in >> a.nr_filme;
+    return in;
+}
+Film operator+(Film a1, Film a2)
+{
+    a1.age += a2.age;
+    return a1;
+}
+Film operator++(Film a, int nr_filme)
+{
+    Film copie = a;
+    a.nr_filme++;
+    return copie;
+}
+bool operator!(Film a)
+{
+    return a.age != 0;
+}
+
+class Seating_plan
+{
+private:
+    int* nr_loc[30];
+    int* nr_rand[10];
+    string sala;
+    char* categorie;
+    const int nr_maxim_locuri = 300;
+    const int nr_maxim_categoria1 = 150;
+    const int nr_maxim_categoria2 = 100;
+    const int nr_maxim_categoria3 = 50;
+    static int locuri_ocupate_c1;
+    static int locuri_ocupate_c2;
+    static int locuri_ocupate_c3;
+public:
+    Seating_plan()
+    {
+        categorie = (char*)&"";
+
+    }
+    Seating_plan(char* categorie,int* nr_loc, int* nr_rand, string sala)
+    {
+        for(int i = 0; i< 10; i++)
+          this->nr_rand[i] = &nr_rand[i];
+        for(int i = 0 ; i<30 ; i++)
+          this->nr_loc[i] = &nr_loc[i];
+        this->categorie = new char[strlen(categorie) + 1];
+        for (int i = 0; i < strlen(categorie) + 1; i++)
+            this->categorie[i] = categorie[i];
+        for (int i = 0; i < sala.length(); i++)
+            this->sala[i] = sala[i];
+
+    }
+    ~Seating_plan()
+    {
+        if (categorie != nullptr && categorie != " ")
+            delete[] categorie;
+        if (nr_loc != NULL)
+            delete[] nr_loc;
+        if (nr_rand != NULL)
+            delete[] nr_loc;
+    }
+    Seating_plan(const Seating_plan& a)
+    {
+        for (int i = 0; i < 10; i++)
+            nr_rand[i] = a.nr_rand[i];
+        for (int i = 0; i < 30; i++)
+            nr_loc[i] = a.nr_loc[i];
+        categorie = new char[strlen(a.categorie) + 1];
+        for (int i = 0; i < strlen(a.categorie) + 1; i++)
+            categorie[i] = a.categorie[i];
+        for (int i = 0; i < sala.length(); i++)
+            sala[i] = a.sala[i];
+    }
+    Seating_plan operator=(Seating_plan a)
+    {
+        if (categorie != a.categorie)
+        {
+            if (categorie != " ")
+            {
+                delete[] categorie;
+                categorie = (char*)&"";
+            }
+            categorie = new char[strlen(a.categorie) + 1];
+            for (int i = 0; i < strlen(a.categorie) + 1; i++)
+                categorie[i] = a.categorie[i];
+
+        }
+        else
+            categorie = nullptr;
+        if (nr_rand != a.nr_rand)
+        {
+            if (nr_rand != NULL)
+            {
+                delete[]nr_rand;
+            }
+            for (int i = 0; i < 10; i++)
+                this->nr_rand[i] = a.nr_rand[i];
+
+        }
+        if (nr_loc != a.nr_loc)
+        {
+            if (nr_loc != NULL)
+            {
+                delete[]nr_loc;
+            }
+            for (int i = 0; i < 30; i++)
+                this->nr_loc[i] = a.nr_loc[i];
+
+        }
+        return *this;
+    }
+    friend ostream& operator<<(ostream&, Seating_plan);
+    friend istream& operator>>(istream&, Seating_plan);
+    int* operator[](int index)
+    {
+        if (index >= 0)
+            return nr_loc[index];
+    }
+    friend Seating_plan operator+(Seating_plan, Seating_plan);
+    Seating_plan operator++()
+    {
+        locuri_ocupate_c1++;
+        return *this;
+    }
+    friend Seating_plan operator++(Seating_plan, int);
+    operator int()
+    {
+        return locuri_ocupate_c1;
+    }
+    friend bool operator!(Seating_plan);
+    bool operator == (const Seating_plan& c)
+    {
+        Seating_plan copie = c;
+        if (c.categorie == copie.categorie)
+            return true;
+        else
+            return false;
+
+    }
+};
+int Seating_plan::locuri_ocupate_c1;
+int Seating_plan::locuri_ocupate_c2;
+int Seating_plan::locuri_ocupate_c3;
+ostream& operator<<(ostream& out, Seating_plan a)
+{
+    out << a.locuri_ocupate_c1 << endl;
+    for (int i = 0; i < 30; i++)
+        out << a.nr_loc[i];
+    out << endl;
+    for (int i = 0; i < 10; i++)
+        out << a.nr_rand[i] << endl;
+    for (int i = 0; i < a.sala.length(); i++)
+        out << a.sala[i];
+    out << endl;
+    for (int i = 0; i < strlen(a.categorie); i++)
+        out << a.categorie[i];
+    out << endl;
+    return out;
+}
+istream& operator>>(istream& in, Seating_plan a)
+{
+    in >> a.locuri_ocupate_c1;
+    for (int i = 0; i < a.sala.length(); i++)
+        in >> a.sala[i];
+    for (int i = 0; i < strlen(a.categorie); i++)
+        in >> a.categorie[i];
+    return in;
+}
+Seating_plan operator+(Seating_plan a1, Seating_plan a2)
+{
+    a1.locuri_ocupate_c1 = a2.locuri_ocupate_c1;
+    return a1;
+}
+Seating_plan operator++(Seating_plan a,int)
+{
+    Seating_plan copie = a;
+    a.locuri_ocupate_c1++;
+    return a;
+}
+bool operator!(Seating_plan a)
+{
+    return a.locuri_ocupate_c1 != 0;
+}
+
+class Bilet : public Film, Seating_plan
+{
+private:
+    static int pret;
+    const char* locatie = (const char*) "Afi Palace Cotroceni Bucuresti";
+    int* numarul_biletului[10000];
+    char* tip_bilet;
+public:
+    Bilet()
+    {
+        tip_bilet = (char*)&"";
+
+    }
+    Bilet(char* tip_bilet, int* numarul_biletului)
+    {
+        for (int i = 0; i < sizeof(numarul_biletului); i++)
+            this->numarul_biletului[i] = (int*)numarul_biletului[i];
+        this->tip_bilet = new char[strlen(tip_bilet) + 1];
+        for (int i = 0; i < strlen(tip_bilet) + 1; i++)
+            this->tip_bilet[i] = tip_bilet[i];
+
+    }
+    ~Bilet()
+    {
+        if (tip_bilet != nullptr)
+            delete[]tip_bilet;
+        if (numarul_biletului != NULL)
+            delete[]numarul_biletului;
+    }
+    Bilet(const Bilet& a)
+    {
+        for (int i = 0; i < sizeof(a.numarul_biletului); i++)
+            numarul_biletului[i] = (int*)a.numarul_biletului[i];
+        tip_bilet = new char[strlen(a.tip_bilet) + 1];
+        for (int i = 0; i < strlen(a.tip_bilet) + 1; i++)
+            tip_bilet[i] = a.tip_bilet[i];
+
+    }
+    Bilet operator=(Bilet a)
+    {
+        if (tip_bilet != a.tip_bilet)
+        {
+            if (tip_bilet != " ")
+            {
+                delete[] tip_bilet;
+                tip_bilet = (char*)&"";
+            }
+            tip_bilet = new char[strlen(a.tip_bilet) + 1];
+            for (int i = 0; i < strlen(a.tip_bilet) + 1; i++)
+                tip_bilet[i] = a.tip_bilet[i];
+        }
+        if (numarul_biletului != a.numarul_biletului)
+        {
+            if (numarul_biletului != NULL)
+            {
+                delete[]numarul_biletului;
+            }
+            for (int i = 0; i < sizeof(a.numarul_biletului); i++)
+                numarul_biletului[i] = (int*)a.numarul_biletului[i];
+        }
+        return *this;
+    }
+    friend ostream& operator<<(ostream&, Bilet);
+    friend istream& operator>>(istream&, Bilet);
+    int* operator[](int index)
+    {
+        if (index >= 0)
+            return numarul_biletului[index];
+    }
+    friend Bilet operator+(Bilet, Bilet);
+    Bilet operator++()
+    {
+        pret++;
+        return *this;
+    }
+    friend Bilet operator++(Bilet,int);
+    operator int()
+    {
+        return pret;
+    }
+    friend bool operator!(Bilet);
+    bool operator == (const Bilet& c)
+    {
+        Bilet copie = c;
+        if (c.tip_bilet == copie.tip_bilet)
+            return true;
+        else
+            return false;
+
+    }
+};
+int Bilet::pret;
+ostream& operator<<(ostream& out, Bilet a)
+{
+    out << a.pret << endl;
+    for (int i = 0; i < sizeof(a.numarul_biletului); i++)
+        out << a.numarul_biletului[i];
+    out << endl;
+    for (int i = 0; i < strlen(a.tip_bilet); i++)
+        out << a.tip_bilet[i];
+    out << endl;
+    return out;
+}
+istream& operator>>(istream& in, Bilet a)
+{
+    in >> a.pret;
+    for (int i = 0; i < strlen(a.tip_bilet); i++)
+        in >> a.tip_bilet[i];
+    return in;
+}
+Bilet operator+(Bilet a1, Bilet a2)
+{
+    a1.pret += a2.pret;
+    return a1;
+}
+Bilet operator++(Bilet a,int pret)
+{
+    Bilet copie = a;
+    a.pret++;
+    return a;
+}
+bool operator!(Bilet a)
+{
+    return a.pret != 0;
+}
+
+class Plata : public Bilet
+{
+private:
+    char* modalitate;
+    static int numar_plata;
+    string numar_card;
+    int* cvv[10000];
+    char* nume_detinator_card;
+    const char* currency = (const char*)"RON";
+public:
+    Plata()
+    {
+        modalitate = (char*)&"";
+        nume_detinator_card = (char*)&"";
+        numar_card = "";
+
+    }
+    Plata(char* modalitate, string numar_card, int* cvv, char* nume_detinator_card)
+    {
+
+        this->modalitate = (char*)&modalitate;
+        this->numar_card = numar_card;
+        for (int i = 0; i < sizeof(cvv); i++)
+            this->cvv[i] = (int*)cvv[i];
+        this->nume_detinator_card = (char*)&nume_detinator_card;
+    }
+    ~Plata()
+    {
+        if (modalitate != nullptr)
+            delete[]modalitate;
+        if (cvv != NULL)
+            delete[]cvv;
+        if (nume_detinator_card != nullptr)
+            delete[]nume_detinator_card;
+    }
+    Plata(const Plata& a)
+    {
+        modalitate = (char*)&a.modalitate;
+        numar_card = a.numar_card;
+        for (int i = 0; i < sizeof(a.cvv); i++)
+            cvv[i] = (int*)a.cvv[i];
+        nume_detinator_card = (char*)&a.nume_detinator_card;
+    }
+    Plata operator=(Plata a)
+    {
+        if (modalitate != a.modalitate)
+        {
+            if (modalitate != nullptr)
+                delete[]modalitate;
+            modalitate = (char*)&a.modalitate;
+        }
+        if (cvv != a.cvv)
+        {
+            if (cvv != NULL)
+                delete[]cvv;
+            for (int i = 0; i < sizeof(a.cvv); i++)
+                cvv[i] = (int*)a.cvv[i];
+        }
+        if (nume_detinator_card != a.nume_detinator_card)
+        {
+            if (nume_detinator_card != nullptr)
+                delete[]nume_detinator_card;
+            nume_detinator_card = (char*)&a.nume_detinator_card;
+        }
+        return *this;
+    }
+    friend ostream& operator<<(ostream&, Plata);
+    friend istream& operator>>(istream&, Plata);
+    int* operator[](int index)
+    {
+        if (index >= 0)
+            return cvv[index];
+    }
+    friend Plata operator+(Plata, Plata);
+    Plata operator++()
+    {
+        numar_plata++;
+        return *this;
+    }
+    friend Plata operator++(Plata,int);
+    operator int()
+    {
+        return numar_plata;
+    }
+    friend bool operator!(Plata);
+    bool operator == (const Plata& c)
+    {
+        Plata copie = c;
+        if (c.nume_detinator_card == copie.nume_detinator_card)
+            return true;
+        else
+            return false;
+
+    }
+};
+int Plata::numar_plata;
+ostream& operator<<(ostream& out, Plata a)
+{
+    for (int i = 0; i < strlen(a.modalitate);i++)
+        out << a.modalitate[i];
+    out << endl;
+    out << a.numar_plata << endl;
+    for (int i = 0; a.numar_card.length(); i++)
+        out << a.numar_card[i];
+    out << endl;
+    for (int i = 0; i < sizeof(a.cvv); i++)
+        out << a.cvv[i];
+    out << endl;
+    for (int i = 0; i < strlen(a.nume_detinator_card); i++)
+        out << a.nume_detinator_card[i];
+    out << endl;
+    return out;
+}
+istream& operator>>(istream& in, Plata a)
+{
+    for (int i = 0; i < strlen(a.modalitate);i++)
+        in >> a.modalitate[i];
+    in >> a.numar_plata;
+    for (int i = 0; a.numar_card.length(); i++)
+        in >> a.numar_card[i];
+    for (int i = 0; i < strlen(a.nume_detinator_card); i++)
+        in >> a.nume_detinator_card[i];
+    return in;
+}
+Plata operator+(Plata a1, Plata a2)
+{
+    a1.numar_plata += a2.numar_plata;
+    return a1;
+}
+Plata operator++(Plata a,int numar_plata)
+{
+    Plata copie = a;
+    a.numar_plata++;
+    return a;
+}
+bool operator!(Plata a)
+{
+    return a.numar_plata !=0;
+}
+
+class Date_personale_cont
+{ 
+private:
+    char* nume;
+    char* prenume;
+    char adresa;
+    string email;
+    int* nr_telefon[10];
+    const int varsta_minima = 18;
+    static int id_cont;
+public:
+    Date_personale_cont(char* nume, char* prenume, int* nr_telefon)
+    {
+        this->nume = (char*)&nume;
+        this->prenume = (char*)&prenume;
+        for (int i = 0; i < sizeof(nr_telefon); i++)
+            this->nr_telefon[i] = (int*)nr_telefon[i];
+    }
+
+    ~Date_personale_cont()
+    {
+        if (nume != nullptr)
+            delete[]nume;
+        if (prenume != nullptr)
+            delete[]prenume;
+        if (nr_telefon != NULL)
+            delete[]nr_telefon;
+    }
+    Date_personale_cont(const Date_personale_cont& a)
+    {
+        nume = (char*)&a.nume;
+        prenume = (char*)&a.prenume;
+        for (int i = 0; i < sizeof(nr_telefon); i++)
+            nr_telefon[i] = a.nr_telefon[i];
+    }
+    Date_personale_cont operator=(Date_personale_cont a)
+    {
+        if (nume != a.nume)
+        {
+            if (nume != nullptr)
+                delete[]nume;
+            nume = (char*)&a.nume;
+        }
+        if (prenume != a.prenume)
+        {
+            if (prenume != nullptr)
+                delete[]prenume;
+            prenume = (char*)&a.prenume;
+        }
+        if (nr_telefon != a.nr_telefon)
+        {
+            if (nr_telefon != NULL)
+                delete[]nr_telefon;
+            for (int i = 0; i < sizeof(nr_telefon); i++)
+                nr_telefon[i] = a.nr_telefon[i];
+        }
+        return *this;
+    }
+    friend ostream& operator<<(ostream&, Date_personale_cont);
+    friend istream& operator>>(istream&, Date_personale_cont);
+    int* operator[](int index)
+    {
+        if (index >= 0)
+            return nr_telefon[index];
+    }
+    friend Date_personale_cont operator+(Date_personale_cont, Date_personale_cont);
+    Date_personale_cont operator++()
+    {
+        id_cont++;
+        return *this;
+    }
+    friend Date_personale_cont operator++(Date_personale_cont,int);
+    operator int()
+    {
+        return id_cont;
+    }
+    friend bool operator!(Date_personale_cont); 
+    bool operator == (const Date_personale_cont& c)
+    {
+        Date_personale_cont copie = c;
+        if (c.nume == copie.nume)
+            return true;
+        else
+            return false;
+
+    }
+};
+int Date_personale_cont::id_cont;
+ostream& operator<<(ostream& out, Date_personale_cont a)
+{
+    out << a.id_cont << endl;
+    for (int i = 0; i < strlen(a.nume); i++)
+        out << a.nume[i];
+    out << endl; 
+    for (int i = 0; i < strlen(a.prenume); i++)
+        out << a.prenume[i];
+    out << endl;
+    for (int i = 0; i < a.email.length(); i++)
+        out << a.email[i];
+    out << endl;
+    for (int i = 0; i < sizeof(a.nr_telefon); i++)
+        out << a.nr_telefon;
+    out << endl;
+    return out;
+
+}
+istream& operator>>(istream& in, Date_personale_cont a)
+{
+    in >> a.id_cont;
+    for (int i = 0; i < strlen(a.nume); i++)
+        in >> a.nume[i];
+    for (int i = 0; i < strlen(a.prenume); i++)
+        in >> a.prenume[i];
+    for (int i = 0; i < a.email.length(); i++)
+        in >> a.email[i];
+    return in;
+
+}
+Date_personale_cont operator+(Date_personale_cont a1, Date_personale_cont a2)
+{
+    a1.id_cont += a2.id_cont;
+    return a1;
+}
+Date_personale_cont operator++(Date_personale_cont a,int id_cont)
+{
+    Date_personale_cont copie = a;
+    a.id_cont++;
+    return a;
+}
+bool operator!(Date_personale_cont a)
+{
+    return a.id_cont != 0;
+}
+
+
+int main()
+{
+    Film a;
+    cout << "Hello World!\n";
+}
+
+
